@@ -25,6 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+    Custom_Classes/enhancedtimer.cpp \
     Main/main.cpp \
     Main/mainwindow.cpp \
     Widgets/BunkerWidget/bunkerwidget.cpp \
@@ -33,6 +34,7 @@ SOURCES += \
     Widgets/NightclubWidget/nightclubwidget.cpp
 
 HEADERS += \
+    Custom_Classes/enhancedtimer.h \
     Main/mainwindow.h \
     Widgets/BunkerWidget/bunkerwidget.h \
     Widgets/GlobalTabWidget/globaltabwidget.h \

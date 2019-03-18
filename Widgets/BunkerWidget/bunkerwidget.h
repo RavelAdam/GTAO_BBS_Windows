@@ -1,13 +1,15 @@
 #ifndef BUNKERWIDGET_H
 #define BUNKERWIDGET_H
 
+#include "Custom_Classes/enhancedtimer.h"
+
 #include <QCheckBox>
 #include <QFormLayout>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QLabel>
 #include <QProgressBar>
-#include <QTimer>
+#include <QPushButton>
 
 //The widget handling the bunker
 class BunkerWidget : public QWidget
@@ -23,7 +25,7 @@ class BunkerWidget : public QWidget
     quint8 m_stock, m_research, m_next_unlock, m_supplies;
 
     //Timers
-    QTimer m_timer_stock, m_timer_research, m_timer_supplies;
+    EnhancedTimer m_timer_stock, m_timer_research, m_timer_supplies;
 
     //----------------------------Variables-----------------------------------//
     //Progress caps

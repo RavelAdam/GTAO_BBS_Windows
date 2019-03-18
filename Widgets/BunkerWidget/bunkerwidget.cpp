@@ -18,11 +18,11 @@ BunkerWidget::BunkerWidget(QWidget *parent)
     //------------------------------------Upgrades------------------------------------------//
     //Set the GroupBox containing the bunker upgrades
     QGroupBox* upgrades_groupbox = new QGroupBox(tr("Upgrades"));
-    bunker_widget_layout->addWidget(upgrades_groupbox, 0, 0, 1, 2);
+    bunker_widget_layout->addWidget(upgrades_groupbox, 2, 0, 1, 2);
     QVBoxLayout* upgrades_groupbox_layout = new QVBoxLayout();
     upgrades_groupbox->setLayout(upgrades_groupbox_layout);
 
-    //Add the upgrades checkboxes
+    //Add the upgrades checkboxes to the upgrade groupBox
     QCheckBox* equipment_upgrade_checkbox = new QCheckBox(tr("Equipment Upgrade"));
     equipment_upgrade_checkbox->setChecked(m_has_equipment_upgrade);
     upgrades_groupbox_layout->addWidget(equipment_upgrade_checkbox);
@@ -77,7 +77,7 @@ BunkerWidget::BunkerWidget(QWidget *parent)
     QFormLayout* timers_groupbox_layout = new QFormLayout();
     timers_groupbox->setLayout(timers_groupbox_layout);
 
-    //-----Add the timers to the progress GroupBox-----/
+    //-----Add the timers to the timer GroupBox-----/
     //Full Stock Timer
     QLabel* label_timer_full_stock = new QLabel("00:00");
     timers_groupbox_layout->addRow(tr("Stock full:"), label_timer_full_stock);
@@ -89,6 +89,30 @@ BunkerWidget::BunkerWidget(QWidget *parent)
     //Empty Supplies Timer
     QLabel* label_timer_empty_supplies = new QLabel("00:00");
     timers_groupbox_layout->addRow(tr("Empty supplies:"), label_timer_empty_supplies);
+
+    //------------------------------------Action buttons------------------------------------------//
+    //Set the GroupBox containing the action buttons
+    QGroupBox* actions_groupbox = new QGroupBox(tr("Actions"));
+    bunker_widget_layout->addWidget(actions_groupbox, 0, 0, 1, 2);
+    QVBoxLayout* actions_groupbox_layout = new QVBoxLayout();
+    actions_groupbox->setLayout(actions_groupbox_layout);
+
+    //-----Add the actions buttonsto the action GroupBox-----/
+    //Start/Pause Production/Research Button
+    QPushButton* button_start_pause_prod_research = new QPushButton(tr("Start Production/Research"));
+    actions_groupbox_layout->addWidget(button_start_pause_prod_research);
+
+    //Supplies Bought/Arrived Button
+    QPushButton* button_supplies_bought_arrived = new QPushButton(tr("Supplies Bought"));
+    actions_groupbox_layout->addWidget(button_supplies_bought_arrived);
+
+    //Supplies Stolen Button
+    QPushButton* button_supplies_stolen = new QPushButton(tr("Supplies Stolen"));
+    actions_groupbox_layout->addWidget(button_supplies_stolen);
+
+    //Reset Bunker Button (whenever the player fails a raid mission)
+    QPushButton* button_reset_bunker = new QPushButton(tr("Reset Bunker (Raided)"));
+    actions_groupbox_layout->addWidget(button_reset_bunker);
 }
 
 //Destructor
