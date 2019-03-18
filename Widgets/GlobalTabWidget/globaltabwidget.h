@@ -5,7 +5,6 @@
 #include "Widgets/MCWidget/mcwidget.h"
 #include "Widgets/NightclubWidget/nightclubwidget.h"
 
-#include <QTabBar>
 #include <QTabWidget>
 
 //The global widget containing all of the different tabs (Bunker, MC, Nightclub, etc.)
