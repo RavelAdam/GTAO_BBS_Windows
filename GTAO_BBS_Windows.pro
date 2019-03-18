@@ -26,10 +26,18 @@ CONFIG += c++11
 
 SOURCES += \
     Main/main.cpp \
-    Main/mainwindow.cpp
+    Main/mainwindow.cpp \
+    Widgets/BunkerWidget/bunkerwidget.cpp \
+    Widgets/GlobalTabWidget/globaltabwidget.cpp \
+    Widgets/MCWidget/mcwidget.cpp \
+    Widgets/NightclubWidget/nightclubwidget.cpp
 
 HEADERS += \
-    Main/mainwindow.h
+    Main/mainwindow.h \
+    Widgets/BunkerWidget/bunkerwidget.h \
+    Widgets/GlobalTabWidget/globaltabwidget.h \
+    Widgets/MCWidget/mcwidget.h \
+    Widgets/NightclubWidget/nightclubwidget.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
