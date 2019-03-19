@@ -8,7 +8,8 @@ BunkerWidget::BunkerWidget(QWidget *parent)
     //Set the variables values
     m_has_equipment_upgrade = m_has_staff_upgrade = false;
     m_stock = m_research = m_next_unlock = m_supplies = 0;
-
+    m_stock_is_full = false;
+    m_supplies_are_empty = true;
 
     //-----------------------------------Main Layout----------------------------------------//
     //Set main layout of the bunker widget
@@ -43,7 +44,8 @@ BunkerWidget::BunkerWidget(QWidget *parent)
     stock_progress_bar->setMinimum(0);
     stock_progress_bar->setMaximum(m_max_stock);
     stock_progress_bar->setValue(m_stock);
-    stock_progress_bar->setFormat(QString::number(m_stock) + "/" + QString::number(m_max_stock));
+    stock_progress_bar->setFormat("%v/" + QString::number(m_max_stock));
+    stock_progress_bar->setAlignment(Qt::AlignCenter);
     progress_bar_groupbox_layout->addRow(tr("Stock"), stock_progress_bar);
 
     //Research bar
@@ -51,7 +53,8 @@ BunkerWidget::BunkerWidget(QWidget *parent)
     research_progress_bar->setMinimum(0);
     research_progress_bar->setMaximum(m_max_research);
     research_progress_bar->setValue(m_research);
-    research_progress_bar->setFormat(QString::number(m_research) + "/" + QString::number(m_max_research));
+    research_progress_bar->setFormat("%v/" + QString::number(m_max_research));
+    research_progress_bar->setAlignment(Qt::AlignCenter);
     progress_bar_groupbox_layout->addRow(tr("Research"), research_progress_bar);
 
     //Next unlock bar
@@ -59,7 +62,8 @@ BunkerWidget::BunkerWidget(QWidget *parent)
     next_unlock_progress_bar->setMinimum(0);
     next_unlock_progress_bar->setMaximum(m_max_next_unlock);
     next_unlock_progress_bar->setValue(m_next_unlock);
-    next_unlock_progress_bar->setFormat(QString::number(m_next_unlock) + "/" + QString::number(m_max_next_unlock));
+    next_unlock_progress_bar->setFormat("%v/" + QString::number(m_max_next_unlock));
+    next_unlock_progress_bar->setAlignment(Qt::AlignCenter);
     progress_bar_groupbox_layout->addRow(tr("Next Research Unlock"), next_unlock_progress_bar);
 
     //Supplies bar
@@ -67,7 +71,8 @@ BunkerWidget::BunkerWidget(QWidget *parent)
     supplies_progress_bar->setMinimum(0);
     supplies_progress_bar->setMaximum(m_max_supplies);
     supplies_progress_bar->setValue(m_supplies);
-    supplies_progress_bar->setFormat(QString::number(m_supplies) + "/" + QString::number(m_max_supplies));
+    supplies_progress_bar->setFormat("%v/" + QString::number(m_max_supplies));
+    supplies_progress_bar->setAlignment(Qt::AlignCenter);
     progress_bar_groupbox_layout->addRow(tr("Supplies"), supplies_progress_bar);
 
     //------------------------------------Timers------------------------------------------//
@@ -94,28 +99,70 @@ BunkerWidget::BunkerWidget(QWidget *parent)
     //Set the GroupBox containing the action buttons
     QGroupBox* actions_groupbox = new QGroupBox(tr("Actions"));
     bunker_widget_layout->addWidget(actions_groupbox, 0, 0, 1, 2);
-    QVBoxLayout* actions_groupbox_layout = new QVBoxLayout();
+    QGridLayout* actions_groupbox_layout = new QGridLayout();
     actions_groupbox->setLayout(actions_groupbox_layout);
 
     //-----Add the actions buttonsto the action GroupBox-----/
     //Start/Pause Production/Research Button
     QPushButton* button_start_pause_prod_research = new QPushButton(tr("Start Production/Research"));
-    actions_groupbox_layout->addWidget(button_start_pause_prod_research);
+    actions_groupbox_layout->addWidget(button_start_pause_prod_research, 0, 0, 1, 2);
 
     //Supplies Bought/Arrived Button
     QPushButton* button_supplies_bought_arrived = new QPushButton(tr("Supplies Bought"));
-    actions_groupbox_layout->addWidget(button_supplies_bought_arrived);
+    actions_groupbox_layout->addWidget(button_supplies_bought_arrived, 1, 0, 1, 1);
 
     //Supplies Stolen Button
-    QPushButton* button_supplies_stolen = new QPushButton(tr("Supplies Stolen"));
-    actions_groupbox_layout->addWidget(button_supplies_stolen);
+    QPushButton* button_supplies_stolen = new QPushButton(tr("Supplies Stolen") + " (+" + QString::number(m_supplies_bundle_size) + tr(" supplies)"));
+    actions_groupbox_layout->addWidget(button_supplies_stolen, 1, 1, 1, 1);
+
+    //Stock Sold Button
+    QPushButton* button_stock_sold = new QPushButton(tr("Stock Sold"));
+    actions_groupbox_layout->addWidget(button_stock_sold, 2, 0, 1, 1);
+
+    //Sell Mission Canceled Sold Button
+    QPushButton* button_sell_canceled = new QPushButton(tr("Sell Mission Cancelled"));
+    actions_groupbox_layout->addWidget(button_sell_canceled, 2, 1, 1, 1);
 
     //Reset Bunker Button (whenever the player fails a raid mission)
     QPushButton* button_reset_bunker = new QPushButton(tr("Reset Bunker (Raided)"));
-    actions_groupbox_layout->addWidget(button_reset_bunker);
+    actions_groupbox_layout->addWidget(button_reset_bunker, 3, 0, 1, 2);
+
+    //------------------------------------Connections------------------------------------------//
+    //-----Progress bars-----/
+    connect(this, SIGNAL (OnSuppliesChanged(int)), supplies_progress_bar, SLOT(setValue(int)));
+
+    //-----Action buttons-----/
+    connect(button_supplies_stolen, SIGNAL (released()),this, SLOT (StealSupplies()));
+    connect(button_stock_sold, SIGNAL (released()),this, SLOT (StockSold()));
+    connect(button_reset_bunker, SIGNAL (released()),this, SLOT (ResetBunker()));
+
+
 }
 
 //Destructor
 BunkerWidget::~BunkerWidget()
 {
+}
+
+//Steal supplies (add a bundle of supplies to the total supplies level)
+void BunkerWidget::StealSupplies()
+{
+    if (m_supplies + m_supplies_bundle_size > m_max_supplies) m_supplies = m_max_supplies;
+    else m_supplies += m_supplies_bundle_size;
+    emit OnSuppliesChanged(m_supplies);
+}
+
+//Sell stock (reset the stock level)
+void BunkerWidget::StockSold()
+{
+    m_stock = 0;
+    emit OnStockChanged(m_stock);
+}
+
+//Reset bunker (whenever the player fails a raid mission, they lose all of their stock and supplies)
+void BunkerWidget::ResetBunker()
+{
+    m_stock = m_supplies = 0;
+    emit OnStockChanged(m_stock);
+    emit OnSuppliesChanged(m_supplies);
 }
