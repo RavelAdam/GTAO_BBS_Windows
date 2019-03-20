@@ -7,29 +7,56 @@ BunkerWidget::BunkerWidget(QWidget *parent)
     //----------------------------Variable initializations----------------------------------//
     //Set the variables values
     m_has_equipment_upgrade = m_has_staff_upgrade = false;
+    m_staff_manufacturing = 1.0;
+    m_staff_research = 0.0;
     m_stock = m_research = m_next_unlock = m_supplies = 0;
     m_stock_is_full = false;
     m_supplies_are_empty = true;
+    m_timer_next_stock = new EnhancedTimer(0, 1, 0);
 
     //-----------------------------------Main Layout----------------------------------------//
     //Set main layout of the bunker widget
     QGridLayout* bunker_widget_layout = new QGridLayout();
     setLayout(bunker_widget_layout);
 
-    //------------------------------------Upgrades------------------------------------------//
-    //Set the GroupBox containing the bunker upgrades
-    QGroupBox* upgrades_groupbox = new QGroupBox(tr("Upgrades"));
-    bunker_widget_layout->addWidget(upgrades_groupbox, 2, 0, 1, 2);
-    QVBoxLayout* upgrades_groupbox_layout = new QVBoxLayout();
-    upgrades_groupbox->setLayout(upgrades_groupbox_layout);
+    //------------------------------------Upgrades/Staff------------------------------------------//
+    //Set the GroupBox containing the bunker upgrades and the staff management
+    QGroupBox* upgrades_staff_management_groupbox = new QGroupBox(tr("Upgrades / Staff Management"));
+    bunker_widget_layout->addWidget(upgrades_staff_management_groupbox, 2, 0, 1, 2);
+    QVBoxLayout* upgrades_staff_management_groupbox_layout = new QVBoxLayout();
+    upgrades_staff_management_groupbox->setLayout(upgrades_staff_management_groupbox_layout);
 
-    //Add the upgrades checkboxes to the upgrade groupBox
+    //Add the upgrades checkboxes to the upgrades/staff GroupBox
     QCheckBox* equipment_upgrade_checkbox = new QCheckBox(tr("Equipment Upgrade"));
     equipment_upgrade_checkbox->setChecked(m_has_equipment_upgrade);
-    upgrades_groupbox_layout->addWidget(equipment_upgrade_checkbox);
+    upgrades_staff_management_groupbox_layout->addWidget(equipment_upgrade_checkbox);
     QCheckBox* staff_upgrade_checkbox = new QCheckBox(tr("Staff Upgrade"));
     staff_upgrade_checkbox->setChecked(m_has_staff_upgrade);
-    upgrades_groupbox_layout->addWidget(staff_upgrade_checkbox);
+    upgrades_staff_management_groupbox_layout->addWidget(staff_upgrade_checkbox);
+
+    //-----Add staff management RadioButtons to the upgrades/staff Groupbox-----//
+    //Staff Management Layout
+    QHBoxLayout* staff_management_rbuttons_layout = new QHBoxLayout();
+    upgrades_staff_management_groupbox_layout->addLayout(staff_management_rbuttons_layout);
+    QButtonGroup* staff_management_bgroup = new QButtonGroup();
+
+    //Manufacturing only button
+    QRadioButton* rbutton_staff_manuf = new QRadioButton(tr("Manufacturing only"));
+    rbutton_staff_manuf->setChecked(m_staff_manufacturing == 1.0);
+    staff_management_rbuttons_layout->addWidget(rbutton_staff_manuf);
+    staff_management_bgroup->addButton(rbutton_staff_manuf);
+
+    //Both Manufacturing and Research
+    QRadioButton* r_button_staff_both = new QRadioButton(tr("Both Manufacturing / Research"));
+    rbutton_staff_manuf->setChecked(m_staff_manufacturing == 0.5 && m_staff_research == 0.5);
+    staff_management_rbuttons_layout->addWidget(r_button_staff_both);
+    staff_management_bgroup->addButton(r_button_staff_both);
+
+    //Research only button
+    QRadioButton* r_button_staff_research = new QRadioButton(tr("Research only"));
+    rbutton_staff_manuf->setChecked(m_staff_research == 1.0);
+    staff_management_rbuttons_layout->addWidget(r_button_staff_research);
+    staff_management_bgroup->addButton(r_button_staff_research);
 
     //------------------------------------Progress------------------------------------------//
     //Set the GroupBox containing the progress bars
@@ -84,7 +111,7 @@ BunkerWidget::BunkerWidget(QWidget *parent)
 
     //-----Add the timers to the timer GroupBox-----/
     //Full Stock Timer
-    QLabel* label_timer_full_stock = new QLabel("00:00");
+    QLabel* label_timer_full_stock = new QLabel(m_timer_next_stock->getTimeLeft().toString());
     timers_groupbox_layout->addRow(tr("Stock full:"), label_timer_full_stock);
 
     //Next Research Unlock Timer
@@ -93,7 +120,7 @@ BunkerWidget::BunkerWidget(QWidget *parent)
 
     //Empty Supplies Timer
     QLabel* label_timer_empty_supplies = new QLabel("00:00");
-    timers_groupbox_layout->addRow(tr("Empty supplies:"), label_timer_empty_supplies);
+    timers_groupbox_layout->addRow(tr("Supplies empty:"), label_timer_empty_supplies);
 
     //------------------------------------Action buttons------------------------------------------//
     //Set the GroupBox containing the action buttons
@@ -103,9 +130,9 @@ BunkerWidget::BunkerWidget(QWidget *parent)
     actions_groupbox->setLayout(actions_groupbox_layout);
 
     //-----Add the actions buttonsto the action GroupBox-----/
-    //Start/Pause Production/Research Button
-    QPushButton* button_start_pause_prod_research = new QPushButton(tr("Start Production/Research"));
-    actions_groupbox_layout->addWidget(button_start_pause_prod_research, 0, 0, 1, 2);
+    //Start/Pause Manufacturing/Research Button
+    QPushButton* button_start_pause_manuf_research = new QPushButton(tr("Start Manufacturing / Research"));
+    actions_groupbox_layout->addWidget(button_start_pause_manuf_research, 0, 0, 1, 2);
 
     //Supplies Bought/Arrived Button
     QPushButton* button_supplies_bought_arrived = new QPushButton(tr("Supplies Bought"));
@@ -132,9 +159,13 @@ BunkerWidget::BunkerWidget(QWidget *parent)
     connect(this, SIGNAL (OnSuppliesChanged(int)), supplies_progress_bar, SLOT(setValue(int)));
 
     //-----Action buttons-----/
+    connect(button_start_pause_manuf_research, SIGNAL(released()), m_timer_next_stock, SLOT(start()));
     connect(button_supplies_stolen, SIGNAL (released()),this, SLOT (StealSupplies()));
     connect(button_stock_sold, SIGNAL (released()),this, SLOT (StockSold()));
     connect(button_reset_bunker, SIGNAL (released()),this, SLOT (ResetBunker()));
+
+    //----Timer displays-----/
+    connect(m_timer_next_stock, SIGNAL(OnSecondPassed(QString)), label_timer_full_stock, SLOT(setText(QString)));
 
 
 }

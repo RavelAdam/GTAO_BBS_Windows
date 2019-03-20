@@ -3,6 +3,7 @@
 
 #include "Custom_Classes/enhancedtimer.h"
 
+#include <QButtonGroup>
 #include <QCheckBox>
 #include <QFormLayout>
 #include <QGridLayout>
@@ -10,6 +11,7 @@
 #include <QLabel>
 #include <QProgressBar>
 #include <QPushButton>
+#include <QRadioButton>
 
 //The widget handling the bunker
 class BunkerWidget : public QWidget
@@ -17,17 +19,17 @@ class BunkerWidget : public QWidget
     Q_OBJECT
 
     //----------------------------Variables----------------------------------//
-    //Bunker upgrades
+    //Bunker upgrades & Percentage of the staff assigned in each domain
     bool m_has_equipment_upgrade, m_has_staff_upgrade;
+    double m_staff_manufacturing, m_staff_research;
 
     //Progress(current stock, research, research points until next unlock, supplies,
     //full stock, empty supplies)
     int m_stock, m_research, m_next_unlock, m_supplies;
     bool m_stock_is_full, m_supplies_are_empty;
 
-
     //Timers
-    EnhancedTimer m_timer_stock, m_timer_research, m_timer_supplies;
+    EnhancedTimer* m_timer_next_stock;
 
     //----------------------------Constants-----------------------------------//
     //Progress caps
