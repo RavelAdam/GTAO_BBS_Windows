@@ -26,6 +26,7 @@ CONFIG += c++11
 
 SOURCES += \
     Custom_Classes/enhancedtimer.cpp \
+    Custom_Classes/extendedtime.cpp \
     Main/main.cpp \
     Main/mainwindow.cpp \
     Widgets/BunkerWidget/bunkerwidget.cpp \
@@ -35,6 +36,7 @@ SOURCES += \
 
 HEADERS += \
     Custom_Classes/enhancedtimer.h \
+    Custom_Classes/extendedtime.h \
     Main/mainwindow.h \
     Widgets/BunkerWidget/bunkerwidget.h \
     Widgets/GlobalTabWidget/globaltabwidget.h \

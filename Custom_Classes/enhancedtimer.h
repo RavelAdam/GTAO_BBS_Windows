@@ -1,6 +1,8 @@
 #ifndef ENHANCEDTIMER_H
 #define ENHANCEDTIMER_H
 
+#include "extendedtime.h"
+
 #include <QTime>
 #include <QTimer>
 
@@ -11,7 +13,7 @@ class EnhancedTimer : public QTimer
     Q_OBJECT
 
     //The time left on the actual timer
-    QTime m_time_left;
+    ExtendedTime m_time_left;
 
 public:
     //Constructor/Destructor
@@ -19,7 +21,7 @@ public:
     ~EnhancedTimer();
 
     //Time left getter
-    QTime getTimeLeft();
+    ExtendedTime getTimeLeft();
 
     //Check if the timer is over
     bool isOver();

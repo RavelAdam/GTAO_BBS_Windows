@@ -1,13 +1,11 @@
 #include "enhancedtimer.h"
 
-#include <QDebug>
-
 //Constructor
 EnhancedTimer::EnhancedTimer(int p_hours, int p_minutes, int p_seconds, QObject* parent)
     : QTimer(parent)
 {
     //Initialize the time left
-    m_time_left = QTime(p_hours, p_minutes, p_seconds);
+    m_time_left = ExtendedTime(p_hours, p_minutes, p_seconds);
 
     //Since milliseconds aren't needed, the 1-second Timer will stock to seconds in terms of accuracy
     setTimerType(Qt::VeryCoarseTimer);
@@ -23,7 +21,7 @@ EnhancedTimer::~EnhancedTimer()
 }
 
 //Time left getter
-QTime EnhancedTimer::getTimeLeft(){ return m_time_left; }
+ExtendedTime EnhancedTimer::getTimeLeft(){ return m_time_left; }
 
 //Check if the timer is over
 bool EnhancedTimer::isOver()
@@ -44,7 +42,6 @@ void EnhancedTimer::NextSecond()
 
         //Proceed to the next second
         start();
-        qDebug() << m_time_left.toString();
         emit OnSecondPassed(m_time_left.toString());
     }
 

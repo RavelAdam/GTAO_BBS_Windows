@@ -12,7 +12,7 @@ BunkerWidget::BunkerWidget(QWidget *parent)
     m_stock = m_research = m_next_unlock = m_supplies = 0;
     m_stock_is_full = false;
     m_supplies_are_empty = true;
-    m_timer_next_stock = new EnhancedTimer(0, 1, 0);
+    m_timer_next_stock = new EnhancedTimer(70, 1, 0);
 
     //-----------------------------------Main Layout----------------------------------------//
     //Set main layout of the bunker widget
