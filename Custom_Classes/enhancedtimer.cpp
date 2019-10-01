@@ -23,6 +23,12 @@ EnhancedTimer::~EnhancedTimer()
 //Time left getter
 ExtendedTime EnhancedTimer::getTimeLeft(){ return m_time_left; }
 
+//Time left setter
+void EnhancedTimer::setTimer(int p_hours, int p_minutes, int p_seconds)
+{
+    m_time_left.setHMS(p_hours, p_minutes, p_seconds);
+}
+
 //Check if the timer is over
 bool EnhancedTimer::isOver()
 {
@@ -42,13 +48,13 @@ void EnhancedTimer::NextSecond()
 
         //Proceed to the next second
         start();
-        emit OnSecondPassed(m_time_left.toString());
+        emit onValueChanged(m_time_left.toString());
     }
 
     //If the timer is over, stop it
     else
     {
         stop();
-        emit TimerOver();
+        emit onTimeout();
     }
 }

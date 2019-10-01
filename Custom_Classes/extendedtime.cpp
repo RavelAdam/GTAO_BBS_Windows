@@ -5,7 +5,8 @@
 ExtendedTime::ExtendedTime(int p_hours, int p_minutes, int p_seconds)
 {
     m_days = 0;
-    while (p_hours >= 24){
+    while (p_hours >= 24)
+    {
         p_hours -= 24;
         m_days++;
     }

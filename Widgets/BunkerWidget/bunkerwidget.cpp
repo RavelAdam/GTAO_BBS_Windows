@@ -9,9 +9,13 @@ BunkerWidget::BunkerWidget(QWidget *parent)
     m_has_equipment_upgrade = m_has_staff_upgrade = false;
     m_staff_manufacturing = 1.0;
     m_staff_research = 0.0;
+    m_bunker_is_paused = true;
     m_stock = m_research = m_supplies = 0;
     m_stock_is_full = false;
     m_supplies_are_empty = true;
+
+    //Set the timers
+    m_timer_supplies_bought = new EnhancedTimer(0, 0, 0);
     m_timer_next_stock = new EnhancedTimer(70, 0, 0);
 
     //-----------------------------------Main Layout----------------------------------------//
@@ -113,6 +117,10 @@ BunkerWidget::BunkerWidget(QWidget *parent)
     QLabel* label_timer_empty_supplies = new QLabel("00:00");
     timers_groupbox_layout->addRow(tr("Supplies empty:"), label_timer_empty_supplies);
 
+    //Supplies Bought Timer
+    QLabel* label_timer_supplies_bought = new QLabel(m_timer_supplies_bought->getTimeLeft().toString());
+    timers_groupbox_layout->addRow(tr("Supplies arrive in:"), label_timer_supplies_bought);
+
     //------------------------------------Action buttons------------------------------------------//
     //Set the GroupBox containing the action buttons
     QGroupBox* actions_groupbox = new QGroupBox(tr("Actions"));
@@ -122,12 +130,12 @@ BunkerWidget::BunkerWidget(QWidget *parent)
 
     //-----Add the actions buttonsto the action GroupBox-----/
     //Start/Pause Manufacturing/Research Button
-    QPushButton* button_start_pause_manuf_research = new QPushButton(tr("Start Manufacturing / Research"));
-    actions_groupbox_layout->addWidget(button_start_pause_manuf_research, 0, 0, 1, 2);
+    m_button_start_pause_manuf_research = new QPushButton(tr("Start Manufacturing / Research"));
+    actions_groupbox_layout->addWidget(m_button_start_pause_manuf_research, 0, 0, 1, 2);
 
     //Supplies Bought/Arrived Button
-    QPushButton* button_supplies_bought_arrived = new QPushButton(tr("Supplies Bought"));
-    actions_groupbox_layout->addWidget(button_supplies_bought_arrived, 1, 0, 1, 1);
+    m_button_supplies_bought_arrived = new QPushButton(tr("Supplies Bought"));
+    actions_groupbox_layout->addWidget(m_button_supplies_bought_arrived, 1, 0, 1, 1);
 
     //Supplies Stolen Button
     QPushButton* button_supplies_stolen = new QPushButton(tr("Supplies Stolen") + " (+" + QString::number(m_supplies_bundle_size) + tr(" supplies)"));
@@ -150,13 +158,17 @@ BunkerWidget::BunkerWidget(QWidget *parent)
     connect(this, SIGNAL (OnSuppliesChanged(int)), supplies_progress_bar, SLOT(setValue(int)));
 
     //-----Action buttons-----/
-    connect(button_start_pause_manuf_research, SIGNAL(released()), m_timer_next_stock, SLOT(start()));
+    connect(m_button_start_pause_manuf_research, SIGNAL(released()), this, SLOT(StartPause()));
+    connect(m_button_supplies_bought_arrived, SIGNAL(released()), this, SLOT(SuppliesBought()));
     connect(button_supplies_stolen, SIGNAL (released()),this, SLOT (StealSupplies()));
     connect(button_stock_sold, SIGNAL (released()),this, SLOT (StockSold()));
+    connect(button_sell_canceled, SIGNAL (released()),this, SLOT (SellMissionCancelled()));
     connect(button_reset_bunker, SIGNAL (released()),this, SLOT (ResetBunker()));
 
     //----Timer displays-----/
-    connect(m_timer_next_stock, SIGNAL(OnSecondPassed(QString)), label_timer_full_stock, SLOT(setText(QString)));
+    connect(m_timer_next_stock, SIGNAL(onValueChanged(QString)), label_timer_full_stock, SLOT(setText(QString)));
+    connect(m_timer_supplies_bought, SIGNAL(onValueChanged(QString)), label_timer_supplies_bought, SLOT(setText(QString)));
+    connect(m_timer_supplies_bought, SIGNAL(onTimeout()), this, SLOT(SuppliesArrived()));
 
 
 }
@@ -164,6 +176,42 @@ BunkerWidget::BunkerWidget(QWidget *parent)
 //Destructor
 BunkerWidget::~BunkerWidget()
 {
+}
+
+//Start/Pause Manufacturing/Research
+void BunkerWidget::StartPause()
+{
+    //Start Manufacturing/Research
+    if (m_bunker_is_paused)
+    {
+        m_timer_next_stock->start();
+        m_bunker_is_paused = false;
+        m_button_start_pause_manuf_research->setText("Pause Manufacturing/Research");
+    }
+
+    //Pause Manufacturing/Research
+    else
+    {
+        m_timer_next_stock->stop();
+        m_bunker_is_paused = true;
+        m_button_start_pause_manuf_research->setText("Start Manufacturing/Research");
+    }
+}
+
+//Supplies Bought (Arrive in the bunker in 15 minutes)
+void BunkerWidget::SuppliesBought()
+{
+    m_timer_supplies_bought->setTimer(0, 15, 0);
+    m_timer_supplies_bought->start();
+    m_button_supplies_bought_arrived->setText("Supplies inbound...");
+    m_button_supplies_bought_arrived->setEnabled(false);
+}
+
+//Supplies Arrived
+void BunkerWidget::SuppliesArrived()
+{
+    m_button_supplies_bought_arrived->setText("Supplies bought");
+    m_button_supplies_bought_arrived->setEnabled(true);
 }
 
 //Steal supplies (add a bundle of supplies to the total supplies level)
@@ -178,6 +226,14 @@ void BunkerWidget::StealSupplies()
 void BunkerWidget::StockSold()
 {
     m_stock = 0;
+    emit OnStockChanged(m_stock);
+}
+
+//Cancel the Sell mission (lose 3 stock units)
+void BunkerWidget::SellMissionCancelled()
+{
+    if ((m_stock - 3) < 0) m_stock = 0;
+    else m_stock -= 3;
     emit OnStockChanged(m_stock);
 }
 

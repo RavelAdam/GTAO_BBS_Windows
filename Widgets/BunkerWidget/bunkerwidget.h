@@ -28,8 +28,16 @@ class BunkerWidget : public QWidget
     int m_stock, m_research, m_supplies;
     bool m_stock_is_full, m_supplies_are_empty;
 
+    //Boolean indicating if Manufacturing/Research is paused
+    bool m_bunker_is_paused;
+
+    //Buttons
+    QPushButton* m_button_start_pause_manuf_research;
+    QPushButton* m_button_supplies_bought_arrived;
+
     //Timers
     EnhancedTimer* m_timer_next_stock;
+    EnhancedTimer* m_timer_supplies_bought;
 
     //----------------------------Constants-----------------------------------//
     //Progress caps
@@ -53,8 +61,12 @@ signals:
 
 public slots:
     //Action buttons
+    void StartPause();
+    void SuppliesBought();
+    void SuppliesArrived();
     void StealSupplies();
     void StockSold();
+    void SellMissionCancelled();
     void ResetBunker();
 };
 

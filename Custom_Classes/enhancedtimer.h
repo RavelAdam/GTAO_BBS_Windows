@@ -23,15 +23,18 @@ public:
     //Time left getter
     ExtendedTime getTimeLeft();
 
+    //Time left setter
+    void setTimer(int p_hours = 0, int p_minutes = 0, int p_seconds = 0);
+
     //Check if the timer is over
     bool isOver();
 
 signals:
     //Signal called every second (send a QString with the time left)
-    void OnSecondPassed(QString);
+    void onValueChanged(QString);
 
     //Signal called on timeout
-    void TimerOver();
+    void onTimeout();
 
 public slots:
 
