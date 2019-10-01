@@ -6,6 +6,8 @@
 //QTime cannot display hours over 23, this class can
 class ExtendedTime : public QTime
 {
+    //Add a day counter to keep track of hours >= 24
+    int m_days;
 
 public:
     //Constructor/Destructor
@@ -14,6 +16,9 @@ public:
 
     //Override the isValid function : always true
     bool isValid();
+
+    //Override the hour getter
+    int hour() const;
 
     //Display function
     QString toString() const ;

@@ -23,9 +23,9 @@ class BunkerWidget : public QWidget
     bool m_has_equipment_upgrade, m_has_staff_upgrade;
     double m_staff_manufacturing, m_staff_research;
 
-    //Progress(current stock, research, research points until next unlock, supplies,
+    //Progress(current stock, research and supplies,
     //full stock, empty supplies)
-    int m_stock, m_research, m_next_unlock, m_supplies;
+    int m_stock, m_research, m_supplies;
     bool m_stock_is_full, m_supplies_are_empty;
 
     //Timers
@@ -36,7 +36,6 @@ class BunkerWidget : public QWidget
     const int
     m_max_stock = 100,
     m_max_research = 60,
-    m_max_next_unlock = 100,
     m_max_supplies = 100;
 
     //Supplies bundle size

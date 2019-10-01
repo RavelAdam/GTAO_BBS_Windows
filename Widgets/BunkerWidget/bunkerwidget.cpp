@@ -9,10 +9,10 @@ BunkerWidget::BunkerWidget(QWidget *parent)
     m_has_equipment_upgrade = m_has_staff_upgrade = false;
     m_staff_manufacturing = 1.0;
     m_staff_research = 0.0;
-    m_stock = m_research = m_next_unlock = m_supplies = 0;
+    m_stock = m_research = m_supplies = 0;
     m_stock_is_full = false;
     m_supplies_are_empty = true;
-    m_timer_next_stock = new EnhancedTimer(70, 1, 0);
+    m_timer_next_stock = new EnhancedTimer(70, 0, 0);
 
     //-----------------------------------Main Layout----------------------------------------//
     //Set main layout of the bunker widget
@@ -84,15 +84,6 @@ BunkerWidget::BunkerWidget(QWidget *parent)
     research_progress_bar->setAlignment(Qt::AlignCenter);
     progress_bar_groupbox_layout->addRow(tr("Research"), research_progress_bar);
 
-    //Next unlock bar
-    QProgressBar* next_unlock_progress_bar = new QProgressBar();
-    next_unlock_progress_bar->setMinimum(0);
-    next_unlock_progress_bar->setMaximum(m_max_next_unlock);
-    next_unlock_progress_bar->setValue(m_next_unlock);
-    next_unlock_progress_bar->setFormat("%v/" + QString::number(m_max_next_unlock));
-    next_unlock_progress_bar->setAlignment(Qt::AlignCenter);
-    progress_bar_groupbox_layout->addRow(tr("Next Research Unlock"), next_unlock_progress_bar);
-
     //Supplies bar
     QProgressBar* supplies_progress_bar = new QProgressBar();
     supplies_progress_bar->setMinimum(0);
@@ -116,7 +107,7 @@ BunkerWidget::BunkerWidget(QWidget *parent)
 
     //Next Research Unlock Timer
     QLabel* label_timer_next_unlock = new QLabel("00:00");
-    timers_groupbox_layout->addRow(tr("Next research unlock:"), label_timer_next_unlock);
+    timers_groupbox_layout->addRow(tr("Next Research Unlock:"), label_timer_next_unlock);
 
     //Empty Supplies Timer
     QLabel* label_timer_empty_supplies = new QLabel("00:00");
