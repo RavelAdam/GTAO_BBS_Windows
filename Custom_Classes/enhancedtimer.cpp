@@ -27,6 +27,7 @@ ExtendedTime EnhancedTimer::getTimeLeft(){ return m_time_left; }
 void EnhancedTimer::setTimer(int p_hours, int p_minutes, int p_seconds)
 {
     m_time_left.setHMS(p_hours, p_minutes, p_seconds);
+    emit onValueChanged(m_time_left.toString());
 }
 
 //Check if the timer is over
@@ -37,6 +38,12 @@ bool EnhancedTimer::isOver()
             m_time_left.second() == 0);
 }
 
+void EnhancedTimer::addTime(int p_hours, int p_minutes, int p_seconds)
+{
+    m_time_left.addTime(p_hours, p_minutes, p_seconds);
+    emit onValueChanged(m_time_left.toString());
+}
+
 //Slot updating the timer every second
 void EnhancedTimer::NextSecond()
 {
@@ -44,7 +51,7 @@ void EnhancedTimer::NextSecond()
     if (!isOver())
     {
         //Decrement the time left
-        m_time_left = m_time_left.addSecs(-1);
+        m_time_left.secondPassed();
 
         //Proceed to the next second
         start();

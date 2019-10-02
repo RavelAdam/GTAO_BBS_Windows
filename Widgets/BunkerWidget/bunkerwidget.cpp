@@ -7,16 +7,18 @@ BunkerWidget::BunkerWidget(QWidget *parent)
     //----------------------------Variable initializations----------------------------------//
     //Set the variables values
     m_has_equipment_upgrade = m_has_staff_upgrade = false;
-    m_staff_manufacturing = 1.0;
-    m_staff_research = 0.0;
+    m_staff_is_manufacturing = true;
+    m_staff_is_researching = m_staff_is_both_manufacturing_research = false;
     m_bunker_is_paused = true;
     m_stock = m_research = m_supplies = 0;
     m_stock_is_full = false;
     m_supplies_are_empty = true;
 
     //Set the timers
-    m_timer_supplies_bought = new EnhancedTimer(0, 0, 0);
-    m_timer_next_stock = new EnhancedTimer(70, 0, 0);
+    m_timer_supplies_bought = new EnhancedTimer();
+    m_timer_next_stock = new EnhancedTimer();
+    m_timer_full_stock = new EnhancedTimer();
+    SetStockTimers();
 
     //-----------------------------------Main Layout----------------------------------------//
     //Set main layout of the bunker widget
@@ -46,19 +48,19 @@ BunkerWidget::BunkerWidget(QWidget *parent)
 
     //Manufacturing only button
     QRadioButton* rbutton_staff_manuf = new QRadioButton(tr("Manufacturing only"));
-    rbutton_staff_manuf->setChecked(m_staff_manufacturing == 1.0);
+    rbutton_staff_manuf->setChecked(m_staff_is_manufacturing);
     staff_management_rbuttons_layout->addWidget(rbutton_staff_manuf);
     staff_management_bgroup->addButton(rbutton_staff_manuf);
 
     //Both Manufacturing and Research
     QRadioButton* r_button_staff_both = new QRadioButton(tr("Both Manufacturing / Research"));
-    rbutton_staff_manuf->setChecked(m_staff_manufacturing == 0.5 && m_staff_research == 0.5);
+    rbutton_staff_manuf->setChecked(m_staff_is_both_manufacturing_research);
     staff_management_rbuttons_layout->addWidget(r_button_staff_both);
     staff_management_bgroup->addButton(r_button_staff_both);
 
     //Research only button
     QRadioButton* r_button_staff_research = new QRadioButton(tr("Research only"));
-    rbutton_staff_manuf->setChecked(m_staff_research == 1.0);
+    rbutton_staff_manuf->setChecked(m_staff_is_both_manufacturing_research);
     staff_management_rbuttons_layout->addWidget(r_button_staff_research);
     staff_management_bgroup->addButton(r_button_staff_research);
 
@@ -105,8 +107,13 @@ BunkerWidget::BunkerWidget(QWidget *parent)
     timers_groupbox->setLayout(timers_groupbox_layout);
 
     //-----Add the timers to the timer GroupBox-----/
+
+    //Next Stock Unit Timer
+    QLabel* label_timer_next_stock = new QLabel(m_timer_next_stock->getTimeLeft().toString());
+    timers_groupbox_layout->addRow(tr("Next stock unit in:"), label_timer_next_stock);
+
     //Full Stock Timer
-    QLabel* label_timer_full_stock = new QLabel(m_timer_next_stock->getTimeLeft().toString());
+    QLabel* label_timer_full_stock = new QLabel(m_timer_full_stock->getTimeLeft().toString());
     timers_groupbox_layout->addRow(tr("Stock full:"), label_timer_full_stock);
 
     //Next Research Unlock Timer
@@ -166,10 +173,14 @@ BunkerWidget::BunkerWidget(QWidget *parent)
     connect(button_reset_bunker, SIGNAL (released()),this, SLOT (ResetBunker()));
 
     //----Timer displays-----/
-    connect(m_timer_next_stock, SIGNAL(onValueChanged(QString)), label_timer_full_stock, SLOT(setText(QString)));
+    connect(m_timer_next_stock, SIGNAL(onValueChanged(QString)), label_timer_next_stock, SLOT(setText(QString)));
+    connect(m_timer_full_stock, SIGNAL(onValueChanged(QString)), label_timer_full_stock, SLOT(setText(QString)));
     connect(m_timer_supplies_bought, SIGNAL(onValueChanged(QString)), label_timer_supplies_bought, SLOT(setText(QString)));
     connect(m_timer_supplies_bought, SIGNAL(onTimeout()), this, SLOT(SuppliesArrived()));
 
+    //----Checkboxes-----/
+    connect(equipment_upgrade_checkbox, SIGNAL(stateChanged(int)), this, SLOT(setEquipmentUpgrade(int)));
+    connect(staff_upgrade_checkbox, SIGNAL(stateChanged(int)), this, SLOT(setStaffUpgrade(int)));
 
 }
 
@@ -178,24 +189,70 @@ BunkerWidget::~BunkerWidget()
 {
 }
 
+//Start Manufacturing/Research
+void BunkerWidget::Start()
+{
+    m_timer_next_stock->start();
+    m_timer_full_stock->start();
+    m_bunker_is_paused = false;
+    m_button_start_pause_manuf_research->setText("Pause Manufacturing/Research");
+}
+
+//Pause Manufacturing/Research
+void BunkerWidget::Pause()
+{
+    m_timer_next_stock->stop();
+    m_timer_full_stock->stop();
+    m_bunker_is_paused = true;
+    m_button_start_pause_manuf_research->setText("Start Manufacturing/Research");
+}
+
+//Set both next stock unit / full stock timers
+void BunkerWidget::SetStockTimers()
+{
+    //Manufacturing only
+    if (m_staff_is_manufacturing){
+
+        //Both upgrades = 1 unit / 7 Minutes
+        if (m_has_equipment_upgrade && m_has_staff_upgrade) m_timer_next_stock ->setTimer(0, 7, 0);
+
+        //No upgrade = 1 unit / 10 Minutes
+        else if (!m_has_equipment_upgrade && !m_has_staff_upgrade) m_timer_next_stock ->setTimer(0, 10, 0);
+
+        //1 Upgrade only = 1 unit / 8:30 Minutes
+        else m_timer_next_stock ->setTimer(0, 8, 30);
+    }
+
+    //Both Manufacturing and Research (twice as long)
+    else if (m_staff_is_both_manufacturing_research){
+
+        //Both upgrades = 1 unit / 14 Minutes
+        if (m_has_equipment_upgrade && m_has_staff_upgrade) m_timer_next_stock ->setTimer(0, 14, 0);
+
+        //No upgrade = 1 unit / 20 Minutes
+        else if (!m_has_equipment_upgrade && !m_has_staff_upgrade) m_timer_next_stock ->setTimer(0, 20, 0);
+
+        //1 Upgrade only = 1 unit / 17 Minutes
+        else m_timer_next_stock ->setTimer(0, 17, 0);
+    }
+
+    //Research only (Stop Timer)
+    else Pause();
+
+    //Update full stock timer
+    m_timer_full_stock->setTimer(0, 0, 0);
+    for (int i = 0; i < 100 - m_stock; i++) m_timer_full_stock->addTime(m_timer_next_stock->getTimeLeft().hour(),
+                                                                  m_timer_next_stock->getTimeLeft().minute(),
+                                                                  m_timer_next_stock->getTimeLeft().second());
+}
+
+//--------------------------------------Slots--------------------------------------------//
+
 //Start/Pause Manufacturing/Research
 void BunkerWidget::StartPause()
 {
-    //Start Manufacturing/Research
-    if (m_bunker_is_paused)
-    {
-        m_timer_next_stock->start();
-        m_bunker_is_paused = false;
-        m_button_start_pause_manuf_research->setText("Pause Manufacturing/Research");
-    }
-
-    //Pause Manufacturing/Research
-    else
-    {
-        m_timer_next_stock->stop();
-        m_bunker_is_paused = true;
-        m_button_start_pause_manuf_research->setText("Start Manufacturing/Research");
-    }
+    if (m_bunker_is_paused) Start();
+    else Pause();
 }
 
 //Supplies Bought (Arrive in the bunker in 15 minutes)
@@ -212,6 +269,8 @@ void BunkerWidget::SuppliesArrived()
 {
     m_button_supplies_bought_arrived->setText("Supplies bought");
     m_button_supplies_bought_arrived->setEnabled(true);
+    m_stock = 100;
+    emit OnStockChanged(m_stock);
 }
 
 //Steal supplies (add a bundle of supplies to the total supplies level)
@@ -243,4 +302,18 @@ void BunkerWidget::ResetBunker()
     m_stock = m_supplies = 0;
     emit OnStockChanged(m_stock);
     emit OnSuppliesChanged(m_supplies);
+}
+
+void BunkerWidget::setEquipmentUpgrade(int p_equipment_checkbox_state)
+{
+    if (p_equipment_checkbox_state == Qt::CheckState::Checked) m_has_equipment_upgrade = true;
+    else m_has_equipment_upgrade = false;
+    SetStockTimers();
+}
+
+void BunkerWidget::setStaffUpgrade(int p_staff_checkbox_state)
+{
+    if (p_staff_checkbox_state == Qt::CheckState::Checked) m_has_staff_upgrade = true;
+    else m_has_staff_upgrade = false;
+    SetStockTimers();
 }

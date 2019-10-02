@@ -26,6 +26,9 @@ public:
     //Time left setter
     void setTimer(int p_hours = 0, int p_minutes = 0, int p_seconds = 0);
 
+    //Add time
+    void addTime(int p_hours = 0, int p_minutes = 0, int p_seconds = 0);
+
     //Check if the timer is over
     bool isOver();
 

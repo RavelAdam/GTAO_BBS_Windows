@@ -23,6 +23,15 @@ public:
     //Display function
     QString toString() const ;
 
+    //Decrement one second
+    void secondPassed();
+
+    //Set time
+    void setTime(int p_hours = 0, int p_minutes = 0, int p_seconds = 0);
+
+    //Add time
+    void addTime(int p_hours = 0, int p_minutes = 0, int p_seconds = 0);
+
     //Extended time uses the same assignment operator as QTime
     using QTime::operator=;
 

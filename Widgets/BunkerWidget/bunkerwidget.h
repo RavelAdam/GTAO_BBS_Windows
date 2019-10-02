@@ -19,9 +19,11 @@ class BunkerWidget : public QWidget
     Q_OBJECT
 
     //----------------------------Variables----------------------------------//
-    //Bunker upgrades & Percentage of the staff assigned in each domain
+    //Bunker upgrades
     bool m_has_equipment_upgrade, m_has_staff_upgrade;
-    double m_staff_manufacturing, m_staff_research;
+
+    //Staff assigned in each domain
+    bool m_staff_is_manufacturing, m_staff_is_researching, m_staff_is_both_manufacturing_research;
 
     //Progress(current stock, research and supplies,
     //full stock, empty supplies)
@@ -37,6 +39,7 @@ class BunkerWidget : public QWidget
 
     //Timers
     EnhancedTimer* m_timer_next_stock;
+    EnhancedTimer* m_timer_full_stock;
     EnhancedTimer* m_timer_supplies_bought;
 
     //----------------------------Constants-----------------------------------//
@@ -54,12 +57,20 @@ public:
     BunkerWidget(QWidget *parent = nullptr);
     ~BunkerWidget();
 
+    //Start/Pause production
+    void Start();
+    void Pause();
+
+    //Timers
+    void SetStockTimers();
+
 signals:
     //Progress bar values changed
     void OnStockChanged(int p_new_stock_value);
     void OnSuppliesChanged(int p_new_supplies_value);
 
 public slots:
+
     //Action buttons
     void StartPause();
     void SuppliesBought();
@@ -68,6 +79,10 @@ public slots:
     void StockSold();
     void SellMissionCancelled();
     void ResetBunker();
+
+    //Checkboxes
+    void setEquipmentUpgrade(int);
+    void setStaffUpgrade(int);
 };
 
 #endif // BUNKERWIDGET_H
