@@ -26,7 +26,7 @@ ExtendedTime EnhancedTimer::getTimeLeft(){ return m_time_left; }
 //Time left setter
 void EnhancedTimer::setTimer(int p_hours, int p_minutes, int p_seconds)
 {
-    m_time_left.setHMS(p_hours, p_minutes, p_seconds);
+    m_time_left.setTime(p_hours, p_minutes, p_seconds);
     emit onValueChanged(m_time_left.toString());
 }
 

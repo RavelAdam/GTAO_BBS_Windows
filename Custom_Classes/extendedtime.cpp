@@ -51,6 +51,7 @@ void ExtendedTime::setTime(int p_hours, int p_minutes, int p_seconds)
         p_hours--;
     }
 
+    m_days = 0;
     while (p_hours >= 24)
     {
         p_hours -= 24;
@@ -76,7 +77,7 @@ void ExtendedTime::addTime(int p_hours, int p_minutes, int p_seconds)
         p_hours++;
     }
 
-    p_hours += hour();
+    p_hours += QTime::hour();
     while (p_hours >= 24)
     {
         p_hours -= 24;

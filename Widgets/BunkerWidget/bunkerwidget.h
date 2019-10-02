@@ -23,7 +23,7 @@ class BunkerWidget : public QWidget
     bool m_has_equipment_upgrade, m_has_staff_upgrade;
 
     //Staff assigned in each domain
-    bool m_staff_is_manufacturing, m_staff_is_researching, m_staff_is_both_manufacturing_research;
+    bool m_staff_is_manufacturing, m_staff_is_both_manufacturing_research, m_staff_is_researching;
 
     //Progress(current stock, research and supplies,
     //full stock, empty supplies)
@@ -37,9 +37,16 @@ class BunkerWidget : public QWidget
     QPushButton* m_button_start_pause_manuf_research;
     QPushButton* m_button_supplies_bought_arrived;
 
+    //Radio Buttons
+    QRadioButton* m_rbutton_staff_manuf;
+    QRadioButton* m_rbutton_staff_research;
+    QRadioButton* m_rbutton_staff_both;
+
     //Timers
     EnhancedTimer* m_timer_next_stock;
     EnhancedTimer* m_timer_full_stock;
+    EnhancedTimer* m_timer_next_research;
+    EnhancedTimer* m_timer_research_unlock;
     EnhancedTimer* m_timer_supplies_bought;
 
     //----------------------------Constants-----------------------------------//
@@ -63,6 +70,7 @@ public:
 
     //Timers
     void SetStockTimers();
+    void SetResearchTimers();
 
 signals:
     //Progress bar values changed
@@ -83,6 +91,9 @@ public slots:
     //Checkboxes
     void setEquipmentUpgrade(int);
     void setStaffUpgrade(int);
+
+    //Radio buttons
+    void setStaffManagement();
 };
 
 #endif // BUNKERWIDGET_H
