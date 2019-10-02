@@ -47,13 +47,15 @@ class BunkerWidget : public QWidget
     EnhancedTimer* m_timer_full_stock;
     EnhancedTimer* m_timer_next_research;
     EnhancedTimer* m_timer_research_unlock;
+    EnhancedTimer* m_timer_next_supply;
+    EnhancedTimer* m_timer_empty_supplies;
     EnhancedTimer* m_timer_supplies_bought;
 
     //----------------------------Constants-----------------------------------//
     //Progress caps
     const int
     m_max_stock = 100,
-    m_max_research = 60,
+    m_max_research = 100,
     m_max_supplies = 100;
 
     //Supplies bundle size
@@ -67,14 +69,22 @@ public:
     //Start/Pause production
     void Start();
     void Pause();
+    void StartManufacturing();
+    void PauseManufacturing();
+    void StartResearch();
+    void PauseResearch();
+    void StartSupplies();
+    void PauseSupplies();
 
     //Timers
     void SetStockTimers();
     void SetResearchTimers();
+    void SetSuppliesTimers();
 
 signals:
     //Progress bar values changed
     void OnStockChanged(int p_new_stock_value);
+    void OnResearchChanged(int p_new_research_value);
     void OnSuppliesChanged(int p_new_supplies_value);
 
 public slots:
@@ -87,6 +97,11 @@ public slots:
     void StockSold();
     void SellMissionCancelled();
     void ResetBunker();
+
+    //Stock/Research/Supplies Change;
+    void StockUnitProduced();
+    void ResearchUnitProduced();
+    void SupplyUnitConsumed();
 
     //Checkboxes
     void setEquipmentUpgrade(int);
