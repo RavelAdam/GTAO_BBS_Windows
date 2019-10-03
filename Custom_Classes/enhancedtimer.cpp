@@ -20,6 +20,13 @@ EnhancedTimer::~EnhancedTimer()
 {
 }
 
+//Override the display function
+QString EnhancedTimer::toString() const
+{
+    if (isActive())return m_time_left.toString();
+    else return "INACTIVE";
+}
+
 //Time left getter
 ExtendedTime EnhancedTimer::getTimeLeft(){ return m_time_left; }
 
@@ -27,7 +34,7 @@ ExtendedTime EnhancedTimer::getTimeLeft(){ return m_time_left; }
 void EnhancedTimer::setTimer(int p_hours, int p_minutes, int p_seconds)
 {
     m_time_left.setTime(p_hours, p_minutes, p_seconds);
-    emit onValueChanged(m_time_left.toString());
+    emit onValueChanged(toString());
 }
 
 //Check if the timer is over
@@ -41,7 +48,7 @@ bool EnhancedTimer::isOver()
 void EnhancedTimer::addTime(int p_hours, int p_minutes, int p_seconds)
 {
     m_time_left.addTime(p_hours, p_minutes, p_seconds);
-    emit onValueChanged(m_time_left.toString());
+    emit onValueChanged(toString());
 }
 
 //Slot updating the timer every second
@@ -55,7 +62,7 @@ void EnhancedTimer::NextSecond()
 
         //Proceed to the next second
         start();
-        emit onValueChanged(m_time_left.toString());
+        emit onValueChanged(toString());
     }
 
     //If the timer is over, stop it

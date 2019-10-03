@@ -103,6 +103,11 @@ public slots:
     void ResearchUnitProduced();
     void SupplyUnitConsumed();
 
+    //Check if stock is full, research is complete or supplies are empty
+    bool CheckStockFull();
+    bool CheckResearchDone();
+    bool CheckSuppliesEmpty();
+
     //Checkboxes
     void setEquipmentUpgrade(int);
     void setStaffUpgrade(int);

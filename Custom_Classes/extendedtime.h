@@ -20,7 +20,7 @@ public:
     //Override the hour getter
     int hour() const;
 
-    //Display function
+    //Override the display function
     QString toString() const ;
 
     //Decrement one second

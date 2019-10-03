@@ -20,6 +20,9 @@ public:
     EnhancedTimer(int p_hours = 0, int p_minutes = 0, int p_seconds = 0, QObject* parent = nullptr);
     ~EnhancedTimer();
 
+    //Override the display function
+    QString toString() const ;
+
     //Time left getter
     ExtendedTime getTimeLeft();
 
